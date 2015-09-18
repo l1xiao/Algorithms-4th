@@ -1,2 +1,2 @@
 # Algorithms-4th
-This repository record my assignment of Algorithms in coursera.
+This repository records my assignments of Algorithms in coursera.
