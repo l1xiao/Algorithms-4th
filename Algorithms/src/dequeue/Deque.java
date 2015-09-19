@@ -3,19 +3,22 @@ package dequeue;
 import java.util.Iterator;
 
 public class Deque<Item> implements Iterable<Item> {
-	
-	Node front, end;
+
+	private Node front, end;
+
 	private class Node {
 		Item item;
 		Node left, right;
+
 		Node(Item item, Node left, Node right) {
 			this.item = item;
 			this.left = left;
 			this.right = right;
 		}
 	}
-	
+
 	private int N;
+
 	// construct an empty deque
 	public Deque() {
 		front = end = null;
@@ -34,6 +37,8 @@ public class Deque<Item> implements Iterable<Item> {
 
 	// add the item to the front
 	public void addFirst(Item item) {
+		if (item == null)
+			throw new java.lang.NullPointerException();
 		if (N == 0) {
 			front = end = new Node(item, null, null);
 		} else {
@@ -46,6 +51,8 @@ public class Deque<Item> implements Iterable<Item> {
 
 	// add the item to the end
 	public void addLast(Item item) {
+		if (item == null)
+			throw new java.lang.NullPointerException();
 		if (N == 0) {
 			end = front = new Node(item, null, null);
 		} else {
@@ -96,9 +103,10 @@ public class Deque<Item> implements Iterable<Item> {
 
 	// return an iterator over items in order from front to end
 	public Iterator<Item> iterator() {
-		return new Iterator<Item>(){
+		return new Iterator<Item>() {
 			int index = N;
 			Node current = front;
+
 			@Override
 			public boolean hasNext() {
 				return index > 0;
@@ -106,13 +114,14 @@ public class Deque<Item> implements Iterable<Item> {
 
 			@Override
 			public Item next() {
-				if (index == 0) throw new java.util.NoSuchElementException();
+				if (index == 0)
+					throw new java.util.NoSuchElementException();
 				Node temp = current;
 				current = current.left;
 				index--;
 				return temp.item;
 			}
-			
+
 		};
 	}
 
@@ -121,11 +130,11 @@ public class Deque<Item> implements Iterable<Item> {
 		Deque<Integer> unittest = new Deque<Integer>();
 		unittest.addFirst(1);
 		unittest.addFirst(2);
-	
+
 		unittest.addLast(7);
 		unittest.addLast(8);
 		Iterator<Integer> it = unittest.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			System.out.println(it.next());
 		}
 		System.out.println(unittest.removeFirst());
