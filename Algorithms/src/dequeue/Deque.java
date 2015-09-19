@@ -36,10 +36,9 @@ public class Deque<Item> implements Iterable<Item> {
 	public void addFirst(Item item) {
 		if (N == 0) {
 			front = end = new Node(item, null, null);
-		} else if (N == 1){
-			front = new Node(item, null, end);
 		} else {
-			Node temp = new Node(item, null, front);
+			Node temp = new Node(item, front, null);
+			front.right = temp;
 			front = temp;
 		}
 		N++;
@@ -49,10 +48,9 @@ public class Deque<Item> implements Iterable<Item> {
 	public void addLast(Item item) {
 		if (N == 0) {
 			end = front = new Node(item, null, null);
-		} else if (N == 1) {
-			end = new Node(item, front, null);
 		} else {
-			Node temp = new Node(item , end, null);
+			Node temp = new Node(item, null, end);
+			end.left = temp;
 			end = temp;
 		}
 		N++;
@@ -70,8 +68,8 @@ public class Deque<Item> implements Iterable<Item> {
 			front = end;
 			end.left = end.right = null;
 		} else {
-			front = front.right;
-			front.left = null;
+			front = front.left;
+			front.right = null;
 		}
 		N--;
 		return result;
@@ -89,8 +87,8 @@ public class Deque<Item> implements Iterable<Item> {
 			end = front;
 			front.left = front.right = null;
 		} else {
-			end = end.left;
-			end.right = null;
+			end = end.right;
+			end.left = null;
 		}
 		N--;
 		return result;
@@ -110,7 +108,7 @@ public class Deque<Item> implements Iterable<Item> {
 			public Item next() {
 				if (index == 0) throw new java.util.NoSuchElementException();
 				Node temp = current;
-				current = current.right;
+				current = current.left;
 				index--;
 				return temp.item;
 			}
@@ -120,5 +118,19 @@ public class Deque<Item> implements Iterable<Item> {
 
 	// unit testing
 	public static void main(String[] args) {
+		Deque<Integer> unittest = new Deque<Integer>();
+		unittest.addFirst(1);
+		unittest.addFirst(2);
+	
+		unittest.addLast(7);
+		unittest.addLast(8);
+		Iterator<Integer> it = unittest.iterator();
+		while(it.hasNext()) {
+			System.out.println(it.next());
+		}
+		System.out.println(unittest.removeFirst());
+		System.out.println(unittest.removeFirst());
+		System.out.println(unittest.removeFirst());
+		System.out.println(unittest.removeLast());
 	}
 }
