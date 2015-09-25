@@ -46,35 +46,12 @@ public class FastCollinearPoints {
 			throw new java.lang.NullPointerException();
 		N = 0;
 		Arrays.sort(points);
+		Point[] temp = new Point[points.length];
+		for (int i = 0; i < points.length; i++) {
+			temp[i] = points[i];
+		}
 		for (int i = 0; i < points.length - 1; i++) {
-			slope[] slopes = new slope[points.length - i - 1];
-			for (int j = i + 1; j < points.length; j++) {
-				slopes[j - i - 1] = new slope(j, points[i].slopeTo(points[j]));
-				System.out.println(slopes[j - i - 1]);
-			}
-			System.out.println();
-			Arrays.sort(slopes, 0, slopes.length - 1, slopes[0].slopeOrder());
-			slope start = slopes[0];
-			int count = 1;
-			int index = start.i;
-			for (int j = 1; j < slopes.length; j++) {
-				System.out.println(slopes[j]);
-				if (start.slope != slopes[j].slope) {
-					if (count > 3) {
-						segment.add(new LineSegment(points[i], points[index]));
-						count = 1;
-					}
-					start = slopes[j];
-					index = start.i;
-				} else {
-					if (j == slopes.length - 1 && count > 2) {
-						segment.add(new LineSegment(points[i], points[index]));
-						break;
-					}
-					count++;
-					index = Math.max(index, slopes[j].i);
-				}
-			}
+			Arrays.sort(temp, points[i].slopeOrder());
 		}
 	}
 
@@ -96,14 +73,14 @@ public class FastCollinearPoints {
 
 		// read the N points from a file
 		// In in = new In(args[0]);
-		In in = new In("./collinear/input10.txt");
+		In in = new In("./collinear/input9.txt");
 		int N = in.readInt();
-		System.out.println(N);
+//		System.out.println(N);
 		Point[] points = new Point[N];
 		for (int i = 0; i < N; i++) {
 			int x = in.readInt();
 			int y = in.readInt();
-			System.out.println("x:" + x + " y:" + y);
+//			System.out.println("x:" + x + " y:" + y);
 			points[i] = new Point(x, y);
 		}
 
