@@ -1,19 +1,25 @@
 package wordnet;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
-	Digraph G;
+	private Digraph G;
 
 	// constructor takes a digraph (not necessarily a DAG)
 	public SAP(Digraph G) {
+		if (G == null) {
+			throw new java.lang.NullPointerException();
+		}
 		this.G = new Digraph(G);
 	}
 
@@ -47,9 +53,11 @@ public class SAP {
 		Integer p1 = null, p2 = null;
 		for (int vertice1 : v) {
 			for (int vertice2 : w) {
-				if (length < sap(vertice1, vertice2)[1]) {
+				int temp = sap(vertice1, vertice2)[1];
+				if (length > temp) {
 					p1 = vertice1;
 					p2 = vertice2;
+					length = temp;
 				}
 
 			}
@@ -62,46 +70,128 @@ public class SAP {
 		int[] result = new int[2];
 		Queue<Integer> qv = new LinkedList<>();
 		Queue<Integer> qw = new LinkedList<>();
+		Map<Integer, Integer> neighborOfp = new HashMap<>();
+		Map<Integer, Integer> neighborOfq = new HashMap<>();
 		qv.add(v);
 		qv.add(-1);
 		qw.add(w);
 		qw.add(-1);
-		int count = 0;
+		int count1 = 0;
+		int count2 = 0;
 		while (true) {
-			count++;
-			Set<Integer> neighborOfp = new HashSet<>();
-			Set<Integer> neighborOfq = new HashSet<>();
-			while (qv.peek()!= -1) {
-				neighborOfp.addAll((Collection<Integer>) G.adj(qv.poll()));
+			// in a graph, traversal a
+			while (!qv.isEmpty() && qv.peek() != -1) {
+				if (!G.adj(qv.peek()).iterator().hasNext()) {
+					if (neighborOfp.containsKey(qv.peek())) {
+						qv.poll();
+						continue;
+					}
+					neighborOfp.put(qv.poll(), count1);
+				} else {
+					neighborOfp.put(qv.peek(), count1);
+					count1++;
+					for (Integer integer : G.adj(qv.poll())) {
+
+						// if (neighborOfp.containsKey(integer)) continue;
+						neighborOfp.put(integer, count1);
+						qv.add(integer);
+					}
+				}
 			}
-			while (qw.peek() != -1) {
-				neighborOfq.addAll((Collection<Integer>) G.adj(qw.poll()));
+			if (!qv.isEmpty() && qv.peek() == -1) {
+				qv.poll();
+				if (!qv.isEmpty()) {
+					qv.add(-1);
+				}
 			}
-			Set<Integer> intersection = new HashSet<Integer>(neighborOfp);
-			intersection.retainAll(neighborOfq);
+			while (!qw.isEmpty() && qw.peek() != -1) {
+				if (!G.adj(qw.peek()).iterator().hasNext()) {
+					if (neighborOfq.containsKey(qw.peek())) {
+						qw.poll();
+						continue;
+					}
+					neighborOfq.put(qw.poll(), count2);
+				} else {
+					neighborOfq.put(qw.peek(), count2);
+					count2++;
+					for (Integer integer : G.adj(qw.poll())) {
+
+						neighborOfq.put(integer, count2);
+						qw.add(integer);
+					}
+				}
+			}
+			if (!qw.isEmpty() && qw.peek() == -1) {
+				qw.poll();
+				if (!qw.isEmpty()) {
+					qw.add(-1);
+
+				}
+			}
+			Set<Integer> intersection = new HashSet<Integer>(
+					neighborOfp.keySet());
+			intersection.retainAll(neighborOfq.keySet());
 			// find solution
 			if (intersection.size() > 0) {
-				result[0] = (int) intersection.toArray()[0];
-				result[1] = count;
+				int min = Integer.MAX_VALUE;
+				int ancestor = -1;
+				int length = -1;
+				for (Integer temp : intersection) {
+					length = neighborOfp.get(temp) + neighborOfq.get(temp);
+					if (length < min) {
+						min = length;
+						ancestor = temp;
+					}
+				}
+				result[0] = ancestor;
+				result[1] = min;
 				break;
 			}
-			// find no solution 
-			if (neighborOfq.size() == 0 || neighborOfp.size() == 0) {
+			// find no solution
+			if (qw.size() == 0 && qv.size() == 0) {
 				result[0] = -1;
 				result[1] = -1;
 				break;
-			} else {
-				// add neighbors to new level
-				qv.addAll(neighborOfq);
-				qw.addAll(neighborOfp);
-				qv.add(-1);
-				qw.add(-1);
 			}
 		}
 		return result;
 	}
 
 	// do unit testing of this class
+	// public static void main(String[] args) {
+	// Digraph G = new Digraph(8);
+	// G.addEdge(0, 2);
+	// G.addEdge(2, 3);
+	// G.addEdge(1, 3);
+	// G.addEdge(3, 5);
+	// G.addEdge(4, 5);
+	// G.addEdge(6, 7);
+	// SAP test = new SAP(G);
+	// int v = 5;
+	// int w = 5;
+	// System.out.println(test.ancestor(v, w) + "   length:" + test.length(v,
+	// w));
+	// }
 	public static void main(String[] args) {
+		In in = new In("./wordnet/digraph1.txt");
+		// In in = new In(args[0]);
+		Digraph G = new Digraph(in);
+		SAP sap = new SAP(G);
+		// while (!StdIn.isEmpty()) {
+		// int v = StdIn.readInt();
+		// int w = StdIn.readInt();
+		// System.out.println(v + " " + w);
+		// int length = sap.length(v, w);
+		// int ancestor = sap.ancestor(v, w);
+		// StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+		// }
+		for (int v = 0; v < 12; v++) {
+			for (int w = v + 1; w < 13; w++) {
+				System.out.println(v + " " + w);
+				int length = sap.length(v, w);
+				int ancestor = sap.ancestor(v, w);
+				StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+			}
+		}
 	}
 }
