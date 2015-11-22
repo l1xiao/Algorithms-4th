@@ -1,11 +1,12 @@
 # Algorithms-4th
 This repository records my assignments of Algorithms in coursera.
 
-- week1 passed.
-- week2 passed.
-- week3 passed.
-- week4 passed.
-- week5 passed.
+- week 1 passed.
+- week 2 passed.
+- week 3 passed.
+- week 4 passed.
+- week 5 passed.
 
 Part 1 finished.
 
+- week 1 passed
