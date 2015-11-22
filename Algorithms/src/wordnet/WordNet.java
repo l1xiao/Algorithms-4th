@@ -45,7 +45,7 @@ public class WordNet {
 			String[] token = line.split(",");
 			Set<Integer> nouns = new HashSet<>();
 			for (String hypernym : token) {
-				if (hypernym != token[0]) {
+				if (hypernym.equals(token[0])) {
 					nouns.add(Integer.parseInt(hypernym));
 				}
 			}

@@ -9,7 +9,6 @@ import java.util.Set;
 
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
@@ -49,6 +48,9 @@ public class SAP {
 	// a common ancestor that participates in shortest ancestral path; -1 if no
 	// such path
 	public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+		if (v == null || w == null) {
+			throw new java.lang.NullPointerException();
+		}
 		int length = Integer.MAX_VALUE;
 		Integer p1 = null, p2 = null;
 		for (int vertice1 : v) {
@@ -66,6 +68,9 @@ public class SAP {
 	}
 
 	private int[] sap(int v, int w) {
+		if (v == -1 || w == -1) {
+			throw new java.lang.IndexOutOfBoundsException();
+		}
 		// TODO v == w condition
 		int[] result = new int[2];
 		Queue<Integer> qv = new LinkedList<>();
@@ -81,19 +86,19 @@ public class SAP {
 		while (true) {
 			// in a graph, traversal a
 			while (!qv.isEmpty() && qv.peek() != -1) {
+				if (neighborOfp.containsKey(qv.peek())) {
+					qv.poll();
+					continue;
+				}
 				if (!G.adj(qv.peek()).iterator().hasNext()) {
-					if (neighborOfp.containsKey(qv.peek())) {
-						qv.poll();
-						continue;
-					}
 					neighborOfp.put(qv.poll(), count1);
 				} else {
 					neighborOfp.put(qv.peek(), count1);
-					count1++;
+
 					for (Integer integer : G.adj(qv.poll())) {
 
 						// if (neighborOfp.containsKey(integer)) continue;
-						neighborOfp.put(integer, count1);
+						// neighborOfp.put(integer, count1);
 						qv.add(integer);
 					}
 				}
@@ -101,22 +106,23 @@ public class SAP {
 			if (!qv.isEmpty() && qv.peek() == -1) {
 				qv.poll();
 				if (!qv.isEmpty()) {
+					count1++;
 					qv.add(-1);
 				}
 			}
 			while (!qw.isEmpty() && qw.peek() != -1) {
+				if (neighborOfq.containsKey(qw.peek())) {
+					qw.poll();
+					continue;
+				}
 				if (!G.adj(qw.peek()).iterator().hasNext()) {
-					if (neighborOfq.containsKey(qw.peek())) {
-						qw.poll();
-						continue;
-					}
 					neighborOfq.put(qw.poll(), count2);
 				} else {
 					neighborOfq.put(qw.peek(), count2);
-					count2++;
+
 					for (Integer integer : G.adj(qw.poll())) {
 
-						neighborOfq.put(integer, count2);
+						// neighborOfq.put(integer, count2);
 						qw.add(integer);
 					}
 				}
@@ -124,31 +130,32 @@ public class SAP {
 			if (!qw.isEmpty() && qw.peek() == -1) {
 				qw.poll();
 				if (!qw.isEmpty()) {
+					count2++;
 					qw.add(-1);
 
 				}
 			}
-			Set<Integer> intersection = new HashSet<Integer>(
-					neighborOfp.keySet());
-			intersection.retainAll(neighborOfq.keySet());
-			// find solution
-			if (intersection.size() > 0) {
-				int min = Integer.MAX_VALUE;
-				int ancestor = -1;
-				int length = -1;
-				for (Integer temp : intersection) {
-					length = neighborOfp.get(temp) + neighborOfq.get(temp);
-					if (length < min) {
-						min = length;
-						ancestor = temp;
-					}
-				}
-				result[0] = ancestor;
-				result[1] = min;
-				break;
-			}
+			
 			// find no solution
 			if (qw.size() == 0 && qv.size() == 0) {
+				Set<Integer> intersection = new HashSet<Integer>(neighborOfp.keySet());
+				intersection.retainAll(neighborOfq.keySet());
+				// find solution
+				if (intersection.size() > 0) {
+					int min = Integer.MAX_VALUE;
+					int ancestor = -1;
+					int length = -1;
+					for (Integer temp : intersection) {
+						length = neighborOfp.get(temp) + neighborOfq.get(temp);
+						if (length < min) {
+							min = length;
+							ancestor = temp;
+						}
+					}
+					result[0] = ancestor;
+					result[1] = min;
+					break;
+				}
 				result[0] = -1;
 				result[1] = -1;
 				break;
@@ -169,7 +176,7 @@ public class SAP {
 	// SAP test = new SAP(G);
 	// int v = 5;
 	// int w = 5;
-	// System.out.println(test.ancestor(v, w) + "   length:" + test.length(v,
+	// System.out.println(test.ancestor(v, w) + " length:" + test.length(v,
 	// w));
 	// }
 	public static void main(String[] args) {
@@ -178,20 +185,20 @@ public class SAP {
 		Digraph G = new Digraph(in);
 		SAP sap = new SAP(G);
 		// while (!StdIn.isEmpty()) {
-		// int v = StdIn.readInt();
-		// int w = StdIn.readInt();
-		// System.out.println(v + " " + w);
-		// int length = sap.length(v, w);
-		// int ancestor = sap.ancestor(v, w);
-		// StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+		int v = 1;
+		int w = -1;
+		System.out.println(v + " " + w);
+		int length = sap.length(v, w);
+		int ancestor = sap.ancestor(v, w);
+		StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
 		// }
-		for (int v = 0; v < 12; v++) {
-			for (int w = v + 1; w < 13; w++) {
-				System.out.println(v + " " + w);
-				int length = sap.length(v, w);
-				int ancestor = sap.ancestor(v, w);
-				StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
-			}
-		}
+//		for (int v = 0; v < 13; v++) {
+//			for (int w = v + 1; w < 15; w++) {
+//				System.out.println(v + " " + w);
+//				int length = sap.length(v, w);
+//				int ancestor = sap.ancestor(v, w);
+//				StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+//			}
+//		}
 	}
 }
