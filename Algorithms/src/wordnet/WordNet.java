@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
 public class WordNet {
@@ -28,6 +29,7 @@ public class WordNet {
 			ArrayList<String> nouns = new ArrayList<>(Arrays.asList(token[1]
 					.split(" ")));
 			this.synsets.put(id, token[1]);
+			// add findId map for each noun
 			for (String noun : nouns) {
 				if (findId.containsKey(noun)) {
 					findId.get(noun).add(id);
@@ -40,12 +42,14 @@ public class WordNet {
 			}
 		}
 		in = new In(hypernyms);
+
 		while (!in.isEmpty()) {
 			String line = in.readLine();
 			String[] token = line.split(",");
 			Set<Integer> nouns = new HashSet<>();
+			// get set of synsets of hypernym
 			for (String hypernym : token) {
-				if (hypernym.equals(token[0])) {
+				if (!hypernym.equals(token[0])) {
 					nouns.add(Integer.parseInt(hypernym));
 				}
 			}
@@ -56,15 +60,24 @@ public class WordNet {
 			}
 		}
 		// build the graph
+		int count = this.synsets.size();
 		G = new Digraph(this.synsets.size());
 		for (Integer v : this.synsets.keySet()) {
 			if (this.hypernyms.containsKey(v)) {
+				count--;
 				for (Integer w : this.hypernyms.get(v)) {
 					G.addEdge(v, w);
 				}
 			}
 		}
 		// this.synsets.clear();
+		DirectedCycle directedCycle = new DirectedCycle(G);
+		if (directedCycle.hasCycle()) {
+			throw new java.lang.IllegalArgumentException();
+		}
+		if (count > 1) {
+			throw new java.lang.IllegalArgumentException();
+		}
 		this.hypernyms.clear();
 		this.sap = new SAP(this.G);
 	}
@@ -76,12 +89,18 @@ public class WordNet {
 
 	// is the word a WordNet noun?
 	public boolean isNoun(String word) {
+		if (word == null)
+			throw new java.lang.NullPointerException();
 		return findId.keySet().contains(word);
 	}
 
 	// distance between nounA and nounB (defined below)
 	public int distance(String nounA, String nounB) {
-		return sap.length(findID(nounA), findID(nounB));
+		if (!isNoun(nounA) || !isNoun(nounB)) {
+			throw new IllegalArgumentException();
+		} else {
+			return sap.length(findID(nounA), findID(nounB));
+		}
 	}
 
 	private Set<Integer> findID(String nounA) {
@@ -92,34 +111,25 @@ public class WordNet {
 	// nounA and nounB
 	// in a shortest ancestral path (defined below)
 	public String sap(String nounA, String nounB) {
-		Set<Integer> a = findID(nounA);
-		Set<Integer> b = findID(nounB);
-		int id = sap.ancestor(a, b);
-		return synsets.get(id);
+		if (!isNoun(nounA) || !isNoun(nounB)) {
+			throw new IllegalArgumentException();
+		} else {
+			Set<Integer> a = findID(nounA);
+			Set<Integer> b = findID(nounB);
+			int id = sap.ancestor(a, b);
+			if (id < 0)
+				return null;
+			return synsets.get(id);
+		}
 	}
 
 	// do unit testing of this class
 	public static void main(String[] args) {
-		String synsets = "./wordnet/synsets11.txt";
-		String hypernyms = "./wordnet/hypernyms11AmbiguousAncestor.txt";
+		String synsets = "./wordnet/synsets15.txt";
+		String hypernyms = "./wordnet/hypernyms15Path.txt";
 		WordNet test = new WordNet(synsets, hypernyms);
-		// for(String noun:test.nouns()) {
-		// System.out.println(noun);
-		// }
-		// 0,a,one
-		// 1,b,two
-		// 2,c,three
-		// 3,d,four
-		// 4,e,five
-		// 5,f,six
-		// 6,g,seven
-		// 7,h,eight
-		// 8,i,nine
-		// 9,j,ten
-		// 10,k,eleven
-
-		String v = "d";
-		String w = "i";
+		String v = "a";
+		String w = "b";
 		System.out.println("ancestor:" + test.sap(v, w) + " length:"
 				+ test.distance(v, w));
 	}

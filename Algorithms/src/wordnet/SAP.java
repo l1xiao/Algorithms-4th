@@ -36,12 +36,25 @@ public class SAP {
 	// length of shortest ancestral path between any vertex in v and any vertex
 	// in w; -1 if no such path
 	public int length(Iterable<Integer> v, Iterable<Integer> w) {
+		if (v == null || w == null) {
+			throw new java.lang.NullPointerException();
+		} else if (!v.iterator().hasNext()  || !w.iterator().hasNext()) {
+			return -1;
+		}
 		int length = Integer.MAX_VALUE;
+		int count1 = 0, count2 = 0;
 		for (int vertice1 : v) {
 			for (int vertice2 : w) {
-				length = Math.min(sap(vertice1, vertice2)[1], length);
+				count1++;
+				int temp = sap(vertice1, vertice2)[1];
+				if (temp > -1) {
+					length = Math.min(temp, length);
+				} else {
+					count2++;
+				}
 			}
 		}
+		if (count1 == count2) return -1;
 		return length;
 	}
 
@@ -64,6 +77,7 @@ public class SAP {
 
 			}
 		}
+		if (p1 == null || p2 == null) return -1;
 		return sap(p1, p2)[0];
 	}
 
@@ -94,9 +108,8 @@ public class SAP {
 					neighborOfp.put(qv.poll(), count1);
 				} else {
 					neighborOfp.put(qv.peek(), count1);
-
 					for (Integer integer : G.adj(qv.poll())) {
-
+						
 						// if (neighborOfp.containsKey(integer)) continue;
 						// neighborOfp.put(integer, count1);
 						qv.add(integer);
@@ -153,7 +166,11 @@ public class SAP {
 						}
 					}
 					result[0] = ancestor;
-					result[1] = min;
+					if (result[0] < 0) {
+						result[1] = -1;
+					} else {
+						result[1] = min;
+					}
 					break;
 				}
 				result[0] = -1;
@@ -164,21 +181,6 @@ public class SAP {
 		return result;
 	}
 
-	// do unit testing of this class
-	// public static void main(String[] args) {
-	// Digraph G = new Digraph(8);
-	// G.addEdge(0, 2);
-	// G.addEdge(2, 3);
-	// G.addEdge(1, 3);
-	// G.addEdge(3, 5);
-	// G.addEdge(4, 5);
-	// G.addEdge(6, 7);
-	// SAP test = new SAP(G);
-	// int v = 5;
-	// int w = 5;
-	// System.out.println(test.ancestor(v, w) + " length:" + test.length(v,
-	// w));
-	// }
 	public static void main(String[] args) {
 		In in = new In("./wordnet/digraph1.txt");
 		// In in = new In(args[0]);
