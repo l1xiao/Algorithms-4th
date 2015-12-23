@@ -45,8 +45,8 @@ public class SeamCarver {
             throw new java.lang.IndexOutOfBoundsException();
         
         if (x == 0 || x == width()-1 || y == 0 || y == height()-1) 
-            return 195075.0;
-        return squareOfXGradient(x, y) + squareOfYGradient(x, y);
+            return 1000.0;
+        return Math.sqrt(squareOfXGradient(x, y) + squareOfYGradient(x, y));
     }
     
     // sequence of indices for horizontal seam in current picture
@@ -56,7 +56,7 @@ public class SeamCarver {
         return findSeam(energyMatrix);
     }
     
-    // sequence of indices for vertical   seam in current picture
+    // sequence of indices for vertical seam in current picture
     public int[] findVerticalSeam() {
         // construct energy matrix by W x H
         double[][] energyMatrix = toEnergyMatrix(width, height, false);
@@ -71,7 +71,7 @@ public class SeamCarver {
         double[][] energyTo = new double[W][H];
         for (int y = 0; y < H; y++) 
             for (int x = 0; x < W; x++) {            
-                if (y == 0) energyTo[x][y] = 195075.0;
+                if (y == 0) energyTo[x][y] = 1000.0;
                 else energyTo[x][y] = Double.POSITIVE_INFINITY;
             }        
         
@@ -104,15 +104,13 @@ public class SeamCarver {
     public void removeHorizontalSeam(int[] a) {
         if (a.length != width || height <= 1) 
             throw new java.lang.IllegalArgumentException();        
-        //checkSeam(a);
-        
+        checkSeam(a, true);
         int[][] copy = new int[width][height-1];
-        
         for (int x = 0; x < width; x++) {
+        	if (a[x] < 0 || a[x] > height - 1) throw new java.lang.IllegalArgumentException();
             System.arraycopy(colorMatrix[x], 0, copy[x], 0, a[x]);
             System.arraycopy(colorMatrix[x], a[x]+1, copy[x], a[x], height-a[x]-1);
         }
-
         height--;
         colorMatrix = copy;
     }
@@ -121,23 +119,22 @@ public class SeamCarver {
     public void removeVerticalSeam(int[] a) {
         if (a.length != height || width <= 1) 
             throw new java.lang.IllegalArgumentException();        
-        //checkSeam(a);        
-        
+        checkSeam(a, false);        
         int[][] copy = new int[width-1][height];
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
+            	if (a[y] < 0 || a[y] > width - 1) throw new java.lang.IllegalArgumentException();
                 if (x < a[y]) copy[x][y] = colorMatrix[x][y];
                 else if (x > a[y]) copy[x-1][y] = colorMatrix[x][y];
             }
         }
-
         width--;
         colorMatrix = copy;      
     }
     
-    private void checkSeam(int[] a) {
+    private void checkSeam(int[] a, boolean horizontal) {
         for (int i = 1; i < a.length; ++i) {
             if (Math.abs(a[i - 1] - a[i]) > 1)
                 throw new IllegalArgumentException(
@@ -178,4 +175,7 @@ public class SeamCarver {
     private int xyTo1D(int x, int y, double[][] m) {
         return y * m.length + x;
     }   
+    public static void main(String[] args) {
+    	
+    }
 }
