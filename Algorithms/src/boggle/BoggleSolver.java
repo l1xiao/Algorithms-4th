@@ -3,6 +3,7 @@ package boggle;
 
 
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -12,6 +13,7 @@ import edu.princeton.cs.algs4.StdOut;
 public class BoggleSolver {
 	private TrieTree dictionary;
 	private int height, width;
+	private ArrayList<ArrayList<Integer[]>> neighbors_table;
 
 	// Initializes the data structure using the given array of strings as the
 	// dictionary.
@@ -29,12 +31,18 @@ public class BoggleSolver {
 		this.width = board.cols();
 		this.height = board.rows();
 		HashSet<String> results = new HashSet<>();
+		neighbors_table = new ArrayList<ArrayList<Integer[]>>();
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				neighbors_table.add(getNeighbors(board, i, j));
+			}
+		}
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				ArrayList<Character> path = new ArrayList<>();
 				path.add(board.getLetter(i, j));
 				boolean[][] marked = new boolean[height][width];
-				getPath(board, results, path, i, j, marked);
+				getPath(board, results, path, i, j, marked, neighbors_table);
 			}
 		}
 		return results;
@@ -61,34 +69,36 @@ public class BoggleSolver {
 
 	// Recursively generate all paths
 	private void getPath(BoggleBoard board, HashSet<String> results, ArrayList<Character> path, int row, int col,
-			boolean[][] marked) {
+			boolean[][] marked, ArrayList<ArrayList<Integer[]>> neighbors_table) {
 		marked[row][col] = true;
-		String string = charToString(path);
-		if (!prefixQuery(path))
-			return;
-//		if (!prefixQuery(string))
+//		if (!prefixQuery(path))
 //			return;
+		String string = charToString(path);
+
+		if (!prefixQuery(string))
+			return;
 		if (!results.contains(string)) {
 			// System.out.println(string);
 			if (this.dictionary.contains(string) && string.length() > 2) {
 				results.add(string);
 			}
 		}
-		ArrayList<Integer[]> neighbors = (ArrayList<Integer[]>) getNeighbors(board, row, col, marked);
-		for (Integer[] neighbor : neighbors) {
-			int x = neighbor[0];
-			int y = neighbor[1];
+		ArrayList<Integer[]> neighbors = neighbors_table.get(row * board.cols() + col);
+		for (Integer[] a : neighbors) {
+			int x = a[0];
+			int y = a[1];
+			if (marked[x][y]) continue;
 			Character c = board.getLetter(x, y);
 			path.add(c);
-			getPath(board, results, path, x, y, marked);
+			getPath(board, results, path, x, y, marked, neighbors_table);
 			path.remove(path.size() - 1);
 			marked[x][y] = false;
 		}
 	}
 
-	private boolean prefixQuery(ArrayList<Character> query) {
-		return this.dictionary.hasPrefix(query);
-	}
+//	private boolean prefixQuery(ArrayList<Character> query) {
+//		return this.dictionary.hasPrefix(query);
+//	}
 	private boolean prefixQuery(String query) {
 		return this.dictionary.hasPrefix(query);
 	}
@@ -105,45 +115,45 @@ public class BoggleSolver {
 		return result.toString();
 	}
 
-	private Iterable<Integer[]> getNeighbors(BoggleBoard board, int row, int col, boolean[][] marked) {
+	private ArrayList<Integer[]> getNeighbors(BoggleBoard board, int row, int col) {
 		ArrayList<Integer[]> neighbors = new ArrayList<>();
 		// up
-		if (row > 0 && !marked[row - 1][col]) {
+		if (row > 0) {
 			Integer[] n = { row - 1, col };
 			neighbors.add(n);
 		}
 		// down
-		if (row < height - 1 && !marked[row + 1][col]) {
+		if (row < height - 1 ) {
 			Integer[] n = { row + 1, col };
 			neighbors.add(n);
 		}
 		// left
-		if (col > 0 && !marked[row][col - 1]) {
+		if (col > 0 ) {
 			Integer[] n = { row, col - 1 };
 			neighbors.add(n);
 		}
 		// right
-		if (col < width - 1 && !marked[row][col + 1]) {
+		if (col < width - 1 ) {
 			Integer[] n = { row, col + 1 };
 			neighbors.add(n);
 		}
 		// up and left
-		if (row > 0 && col > 0 && !marked[row - 1][col - 1]) {
+		if (row > 0 && col > 0 ) {
 			Integer[] n = { row - 1, col - 1 };
 			neighbors.add(n);
 		}
 		// up and right
-		if (row > 0 && col < width - 1 && !marked[row - 1][col + 1]) {
+		if (row > 0 && col < width - 1 ) {
 			Integer[] n = { row - 1, col + 1 };
 			neighbors.add(n);
 		}
 		// down and left
-		if (row < height - 1 && col > 0 && !marked[row + 1][col - 1]) {
+		if (row < height - 1 && col > 0) {
 			Integer[] n = { row + 1, col - 1 };
 			neighbors.add(n);
 		}
 		// down and right
-		if (row < height - 1 && col < width - 1 && !marked[row + 1][col + 1]) {
+		if (row < height - 1 && col < width - 1 ) {
 			Integer[] n = { row + 1, col + 1 };
 			neighbors.add(n);
 		}
